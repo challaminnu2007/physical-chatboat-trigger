@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physical Chatbot Trigger | Cloud Dashboard</title>
+  <meta name="description" content="A cloud-based alert system powered by AWS Lambda, API Gateway, and DynamoDB — Physical Chatbot Trigger dashboard." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+  <header class="header" role="banner">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="13" stroke="url(#g1)" stroke-width="2"/>
+            <path d="M9 14l3.5 3.5L19 10" stroke="url(#g2)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="g1" x1="1" y1="1" x2="27" y2="27">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+              <linearGradient id="g2" x1="9" y1="10" x2="19" y2="18">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#22d3ee"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Physical Chatbot Trigger</h1>
+          <p class="brand-subtitle">Powered by AWS Lambda &amp; Discord</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="status-dot" id="statusDot" aria-live="polite" title="System status"></span>
+        <span class="status-label" id="statusLabel">Checking…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+  <main class="main" role="main">
+    <div class="grid">
+
+      <!-- ── LEFT COLUMN ── -->
+      <section class="col-left">
+
+        <!-- SEND ALERT CARD -->
+        <div class="card card--primary" id="alertCard">
+          <div class="card-header">
+            <div class="card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92V19a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1h2.09A2 2 0 016 2.77a12.67 12.67 0 00.68 2.74 2 2 0 01-.45 2.11L5.07 8.81a16 16 0 006.12 6.12l1.19-1.19a2 2 0 012.11-.45 12.67 12.67 0 002.74.68A2 2 0 0122 16.92z"/>
+              </svg>
+            </div>
+            <h2 class="card-title">Send Alert</h2>
+          </div>
+
+          <!-- Quick Preset Buttons -->
+          <div class="presets" role="group" aria-label="Quick alert presets">
+            <button class="preset-btn preset--help"   data-msg="🆘 Help Required — A user needs immediate assistance."   id="presetHelp">
+              🆘 Help Required
+            </button>
+            <button class="preset-btn preset--emergency" data-msg="🚨 Emergency Alert — Critical situation detected. Immediate action needed." id="presetEmergency">
+              🚨 Emergency Alert
+            </button>
+            <button class="preset-btn preset--system" data-msg="🔔 System Notification — Routine system check completed."   id="presetSystem">
+              🔔 System Notification
+            </button>
+          </div>
+
+          <div class="divider"><span>or type a custom message</span></div>
+
+          <!-- Message Form -->
+          <form id="alertForm" novalidate aria-label="Custom alert form">
+            <div class="form-group">
+              <label class="form-label" for="messageInput">Message</label>
+              <textarea
+                id="messageInput"
+                name="message"
+                class="form-textarea"
+                rows="4"
+                maxlength="500"
+                placeholder="Type your alert message here…"
+                aria-describedby="charCount msgError"
+                required
+              ></textarea>
+              <div class="textarea-meta">
+                <span class="error-msg" id="msgError" role="alert" aria-live="assertive"></span>
+                <span class="char-count" id="charCount">0 / 500</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="senderName">Your Name <span class="optional">(optional)</span></label>
+              <input
+                type="text"
+                id="senderName"
+                name="sender"
+                class="form-input"
+                maxlength="60"
+                placeholder="e.g. Lab Console"
+              />
+            </div>
+
+            <button type="submit" class="btn btn--primary" id="sendBtn">
+              <span class="btn-text">Send Alert</span>
+              <span class="btn-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </span>
+              <span class="spinner" id="spinner" hidden aria-hidden="true"></span>
+            </button>
+          </form>
+
+          <!-- Toast notification -->
+          <div class="toast" id="toast" role="alert" aria-live="polite" hidden></div>
+        </div>
+
+        <!-- STATS CARD -->
+        <div class="card card--stats">
+          <div class="card-header">
+            <div class="card-icon card-icon--teal">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h2 class="card-title">Session Stats</h2>
+          </div>
+          <div class="stats-grid">
+            <div class="stat">
+              <span class="stat-value" id="statTotal">0</span>
+              <span class="stat-label">Sent</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value stat--green" id="statSuccess">0</span>
+              <span class="stat-label">Success</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value stat--red" id="statFailed">0</span>
+              <span class="stat-label">Failed</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── RIGHT COLUMN ── -->
+      <section class="col-right">
+
+        <!-- HISTORY CARD -->
+        <div class="card card--history">
+          <div class="card-header">
+            <div class="card-icon card-icon--purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <h2 class="card-title">Recent Alerts</h2>
+            <button class="btn-icon-only" id="refreshBtn" title="Refresh history" aria-label="Refresh history">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+              </svg>
+            </button>
+          </div>
+          <div class="history-list" id="historyList" aria-live="polite" aria-label="Alert history">
+            <div class="history-empty" id="historyEmpty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.3">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+              </svg>
+              <p>No alerts yet. Send one above!</p>
+            </div>
+          </div>
+          <div class="history-footer">
+            <button class="btn btn--ghost btn--sm" id="loadMoreBtn" hidden>Load more</button>
+          </div>
+        </div>
+
+        <!-- ARCHITECTURE CARD -->
+        <div class="card card--arch">
+          <div class="card-header">
+            <div class="card-icon card-icon--amber">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <h2 class="card-title">Architecture</h2>
+          </div>
+          <div class="arch-diagram" aria-label="Architecture flow: Browser to API Gateway to Lambda to DynamoDB and Discord">
+            <div class="arch-node arch-node--browser">
+              <span class="arch-icon">🌐</span>
+              <span>Browser</span>
+            </div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node arch-node--apigw">
+              <span class="arch-icon">🔀</span>
+              <span>API GW</span>
+            </div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node arch-node--lambda">
+              <span class="arch-icon">λ</span>
+              <span>Lambda</span>
+            </div>
+            <div class="arch-row-break"></div>
+            <div class="arch-branch">
+              <div class="arch-arrow arch-arrow--down">↓</div>
+              <div class="arch-arrow arch-arrow--down">↓</div>
+            </div>
+            <div class="arch-row-2">
+              <div class="arch-node arch-node--dynamo">
+                <span class="arch-icon">🗄️</span>
+                <span>DynamoDB</span>
+              </div>
+              <div class="arch-node arch-node--discord">
+                <span class="arch-icon">💬</span>
+                <span>Discord</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    <p>Physical Chatbot Trigger &mdash; Cloud Computing Project &copy; 2024</p>
+    <p class="footer-sub">Built with AWS Lambda · API Gateway · DynamoDB · Discord Webhooks</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

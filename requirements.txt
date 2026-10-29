@@ -1,0 +1,14 @@
+# Python dependencies for the Lambda function
+#
+# NOTE: boto3 and botocore are pre-installed in every AWS Lambda Python runtime.
+# You do NOT need to package them.
+# urllib.request is part of the Python standard library — no install needed.
+#
+# This file documents external dependencies. Currently there are NONE,
+# because the function deliberately uses only the standard library + boto3.
+#
+# If you add a third-party library later (e.g. requests, httpx), add it here:
+# requests==2.31.0
+#
+# To install locally for testing:
+#   pip install -r requirements.txt -t ./package/

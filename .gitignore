@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# AWS / Secrets — NEVER commit these
+.aws/
+aws-credentials*
+*.pem
+*.key
+secrets.json
+secrets.yaml
+.env.local
+.env.production
+
+# Lambda deployment package
+backend/lambda_deployment.zip
+backend/package/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Node (if added later)
+node_modules/
+npm-debug.log*
+
+# Terraform (if added later)
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Misc
+*.swp
+*.swo

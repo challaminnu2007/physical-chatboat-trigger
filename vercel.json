@@ -1,0 +1,14 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/alert",
+      "destination": "/api/alert"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/frontend/$1"
+    }
+  ]
+}
+
